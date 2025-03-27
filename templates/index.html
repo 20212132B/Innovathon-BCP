@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerta Mujer - Detección de Fraudes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box">
+            <!-- Mensajes de chat -->
+            <div class="chat-message bot-message">
+                <div class="message-content">
+                    <span class="bot-text">Hola, ¿en qué te puedo ayudar hoy?</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Subida de Imagen -->
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="chat-form">
+            <div class="user-message">
+                <input type="file" name="file" accept="image/*" required>
+                <button type="submit">Subir Imagen</button>
+            </div>
+        </form>
+
+        <!-- Respuesta del sistema -->
+        <div id="response" class="chat-box"></div>
+    </div>
+
+    <script>
+        // Función para simular el chat
+        document.getElementById('chat-form').onsubmit = function(event) {
+            event.preventDefault(); // Evita el refresco de la página al enviar el formulario
+
+            // Muestra el mensaje de la persona
+            var userMessage = document.createElement('div');
+            userMessage.className = 'chat-message user-message';
+            userMessage.innerHTML = `<div class="message-content"><span class="user-text">Subiendo la imagen...</span></div>`;
+            document.querySelector('.chat-box').appendChild(userMessage);
+
+            // Enviar la imagen y obtener la respuesta
+            var formData = new FormData(this);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  var botMessage = document.createElement('div');
+                  botMessage.className = 'chat-message bot-message';
+                  botMessage.innerHTML = `<div class="message-content"><span class="bot-text">${data.alert}</br>${data.extracted_text}</span></div>`;
+                  document.querySelector('.chat-box').appendChild(botMessage);
+                  document.querySelector('#response').innerHTML = `<div class="message-content"><span class="bot-text">${data.alert}</span></div>`;
+              })
+              .catch(error => console.error('Error:', error));
+        };
+    </script>
+</body>
+</html>
